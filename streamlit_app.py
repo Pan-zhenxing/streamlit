@@ -1,12 +1,13 @@
 import os
 os.system('/home/appuser/venv/bin/python -m pip install --upgrade pip')
+'''
 import streamlit as st
 import speech_recognition as sr
 from gpt3 import GPT3
 from playsound import playsound
 
 #设置API_KEY
-API_KEY = os.getenv('API_KEY')
+API_KEY = os.getenv('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')
 
 # 前台显示部分
 st.title('在线聊天机器人')
@@ -43,3 +44,4 @@ if st.button('开始'):
         # 如果用户说再见，则结束循环
         if text == '再见':
             break
+'''
