@@ -4,7 +4,7 @@ from gpt3 import GPT3
 from playsound import playsound
 
 #设置API_KEY
-API_KEY = os.getenv('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')
+API_KEY = os.getenv('APIKEY')
 
 # 前台显示部分
 st.title('在线聊天机器人')
