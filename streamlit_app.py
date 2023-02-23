@@ -1,6 +1,5 @@
 import os
 os.system('/home/appuser/venv/bin/python -m pip install --upgrade pip')
-'''
 import streamlit as st
 import speech_recognition as sr
 from gpt3 import GPT3
@@ -44,4 +43,4 @@ if st.button('开始'):
         # 如果用户说再见，则结束循环
         if text == '再见':
             break
-'''
+
