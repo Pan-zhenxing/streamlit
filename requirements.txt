@@ -3,4 +3,4 @@ opencv-python==4.5.1.48
 numpy==1.21.2
 Pillow==8.3.2
 requests==2.26.0
-augly
+augly==1.0.0
