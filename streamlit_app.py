@@ -1,73 +1,83 @@
 import streamlit as st
-import cv2
-import numpy as np
+from PIL import Image, ImageFilter
+import requests
+from io import BytesIO
 
-st.title("Image Watermark Removal and Cropping App")
+# 定义一个函数，用于下载处理后的图片
+def download_img(img):
+    bio = BytesIO()
+    img.save(bio, format="JPEG")
+    bio.seek(0)
+    return bio.read()
 
-# Function to remove watermark from image
-def remove_watermark(image):
-    # Convert image to grayscale
-    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    # Thresholding to create a mask of the watermark
-    ret, mask = cv2.threshold(gray, 220, 255, cv2.THRESH_BINARY_INV)
-    # Invert the mask
-    mask_inv = cv2.bitwise_not(mask)
-    # Apply the mask to the image to remove the watermark
-    result = cv2.bitwise_and(image, image, mask=mask_inv)
-    return result
+# 设置应用标题和页面布局
+st.set_page_config(page_title="去水印和提高图片品质", layout="wide")
 
-# Function to crop image to 16:9 or 4:3 aspect ratio
-def crop_image(image, aspect_ratio):
-    height, width = image.shape[:2]
-    if aspect_ratio == "16:9":
-        new_width = int(height * 16 / 9)
-        if new_width > width:
-            new_width = width
-            new_height = int(width * 9 / 16)
-            start_x = 0
-            start_y = int((height - new_height) / 2)
+# 定义一个侧边栏，用于输入图片地址或上传本地图片
+st.sidebar.title("上传或输入图片")
+input_type = st.sidebar.radio("选择图片类型", ["URL", "本地文件"])
+if input_type == "URL":
+    url = st.sidebar.text_input("输入图片URL")
+    if url:
+        response = requests.get(url)
+        img = Image.open(BytesIO(response.content))
+else:
+    uploaded_file = st.sidebar.file_uploader("上传图片", type=["png", "jpg", "jpeg"])
+    if uploaded_file is not None:
+        img = Image.open(uploaded_file)
+
+# 如果有图片输入，则显示原图
+if "img" in locals():
+    st.image(img, caption="原图", width=500)
+
+    # 定义一个侧边栏，用于去水印和提高图片品质
+    st.sidebar.title("图片处理")
+    watermark = st.sidebar.checkbox("去除水印")
+    #enhance = st.sidebar.checkbox("提高品质")
+    ratio = st.sidebar.radio("选择图片比例", ["原比例", "16:9", "4:3"])
+
+    # 如果用户选择去水印，则进行去水印处理
+    if watermark:
+        img_array = st.image_to_array(img)
+        img_array[..., -1] = 255 - img_array[..., -1] # 将水印区域像素的alpha通道反转
+        img = Image.fromarray(img_array)
+
+    # 如果用户选择提高图片品质，则进行增强处理
+    #if enhance:
+    #    img = img.filter(ImageFilter.SHARPEN)
+
+    # 如果用户选择了比例，则进行裁剪
+    if ratio == "16:9":
+        width, height = img.size
+        if width * 9 > height * 16:
+            new_width = height * 16 // 9
+            left = (width - new_width) // 2
+            right = left + new_width
+            img = img.crop((left, 0, right, height))
         else:
-            new_height = height
-            start_x = int((width - new_width) / 2)
-            start_y = 0
-    elif aspect_ratio == "4:3":
-        new_width = int(height * 4 / 3)
-        if new_width > width:
-            new_width = width
-            new_height = int(width * 3 / 4)
-            start_x = 0
-            start_y = int((height - new_height) / 2)
+            new_height = width * 9 // 16
+            top = (height - new_height) // 2
+            bottom = top + new_height
+            img = img.crop((0, top, width, bottom))
+    elif ratio == "4:3":
+        width, height = img.size
+        if width * 3 > height * 4:
+            new_width = height * 4 // 3
+            left = (width - new_width) // 2
+            right = left + new_width
+            img = img.crop((left, 0, right, height))
         else:
-            new_height = height
-            start_x = int((width - new_width) / 2)
-            start_y = 0
-    cropped = image[start_y:start_y+new_height, start_x:start_x+new_width]
-    return cropped
-
-# Sidebar for selecting aspect ratio
-aspect_ratio = st.sidebar.selectbox("Select aspect ratio", ["16:9", "4:3"])
-
-# File uploader for uploading image
-uploaded_file = st.file_uploader("Upload an image", type=["jpg", "jpeg", "png"])
-
-if uploaded_file is not None:
-    # Read image from uploaded file
-    file_bytes = np.asarray(bytearray(uploaded_file.read()), dtype=np.uint8)
-    image = cv2.imdecode(file_bytes, 1)
-    # Remove watermark from image
-    image_without_watermark = remove_watermark(image)
-    # Display original and processed images side by side
-    col1, col2 = st.beta_columns(2)
-    col1.header("Original Image")
-    col1.image(image, use_column_width=True)
-    col2.header("Processed Image")
-    col2.image(image_without_watermark, use_column_width=True)
-    # Crop image to selected aspect ratio
-    cropped_image = crop_image(image_without_watermark, aspect_ratio)
-    # Download button for processed image
-    st.download_button(
-        label="Download processed image",
-        data=cropped_image,
-        file_name="processed_image.png",
-        mime="image/png"
-    )
+            new_height = width * 3 // 4
+            top = (height - new_height) // 2
+            bottom = top + new_height
+            img = img.crop
+    # 定义一个按钮，用于下载处理后的图片
+    if st.button("下载图片"):
+        st.image(img, caption="处理后的图片", width=500)
+        st.download_button(
+            label="下载图片",
+            data=download_img(img),
+            file_name="processed_image.jpg",
+            mime="image/jpg",
+        )
+ 
