@@ -57,7 +57,7 @@ if "img" in locals():
                 st.image(img, caption="原图", width=500)
             st.warning("使用鼠标涂抹确定选区")
             canvas_result = st_canvas(
-                fill_color="rgba(255, 165, 0, 0.3)", stroke_width=0, background_color="#ffffff", height=img.size[1], width=img.size[0], drawing_mode="freedraw", key="canvas"
+                fill_color="rgba(255, 165, 0, 0.3)", stroke_width=0, background_color="#ffffff", height=img.size[1], width=img.size[0], drawing_mode="freedraw", key="canvas0"
             )
             if canvas_result.image_data is not None:
                 mask = canvas_result.image_data[:,:,3]
