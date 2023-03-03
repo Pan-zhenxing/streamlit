@@ -5,7 +5,6 @@ from io import BytesIO
 
 # 添加标题
 st.title("程序反馈微信：Allin6118")
-st.write("123")
 
 # 定义一个函数，用于下载处理后的图片
 def download_img(img):
