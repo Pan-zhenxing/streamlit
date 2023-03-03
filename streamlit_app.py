@@ -3,7 +3,7 @@ from PIL import Image, ImageFilter, ImageDraw
 import requests
 from io import BytesIO
 import numpy as np
-from streamlit_canvas import st_canvas
+from streamlit-drawable-canvas import st_canvas
 
 
 # 定义一个函数，用于下载处理后的图片
