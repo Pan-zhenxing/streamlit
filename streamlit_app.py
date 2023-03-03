@@ -80,3 +80,4 @@ if "img" in locals():
             file_name="processed_image.jpg",
             mime="image/jpg",
         )
+ 
