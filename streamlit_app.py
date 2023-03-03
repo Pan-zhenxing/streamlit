@@ -2,6 +2,8 @@ import streamlit as st
 from PIL import Image, ImageFilter
 import requests
 from io import BytesIO
+import numpy as np
+
 
 # 定义一个函数，用于下载处理后的图片
 def download_img(img):
@@ -38,7 +40,7 @@ if "img" in locals():
 
     # 如果用户选择去水印，则进行去水印处理
     if watermark:
-        img_array = st.image_to_array(img)
+        img_array = np.array(img)
         img_array[..., -1] = 255 - img_array[..., -1] # 将水印区域像素的alpha通道反转
         img = Image.fromarray(img_array)
 
