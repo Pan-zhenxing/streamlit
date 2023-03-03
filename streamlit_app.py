@@ -1,5 +1,5 @@
 import streamlit as st
-from PIL import Image, ImageFilter
+from PIL import Image, ImageFilter, ImageDraw
 import requests
 from io import BytesIO
 import numpy as np
