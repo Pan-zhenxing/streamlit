@@ -33,7 +33,7 @@ if "img" in locals():
     # 定义一个侧边栏，用于去水印和提高图片品质
     st.sidebar.title("图片处理")
     watermark = st.sidebar.checkbox("去除水印")
-    enhance = st.sidebar.checkbox("提高品质")
+    #enhance = st.sidebar.checkbox("提高品质")
     ratio = st.sidebar.radio("选择图片比例", ["原比例", "16:9", "4:3"])
 
     # 如果用户选择去水印，则进行去水印处理
@@ -43,8 +43,8 @@ if "img" in locals():
         img = Image.fromarray(img_array)
 
     # 如果用户选择提高图片品质，则进行增强处理
-    if enhance:
-        img = img.filter(ImageFilter.SHARPEN)
+    #if enhance:
+    #    img = img.filter(ImageFilter.SHARPEN)
 
     # 如果用户选择了比例，则进行裁剪
     if ratio == "16:9":
