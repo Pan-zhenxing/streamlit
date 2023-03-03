@@ -1,6 +1,5 @@
-streamlit==1.2.0
-opencv-python-headless==4.5.4.58
-numpy==1.21.4
-Pillow==8.4.0
+streamlit==0.85.0
+pillow==8.4.0
 requests==2.26.0
-streamlit-canvas==0.9.2
+numpy==1.21.5
+streamlit-canvas==0.4.0
