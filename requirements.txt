@@ -2,4 +2,4 @@ streamlit==0.85.0
 pillow==8.4.0
 requests==2.26.0
 numpy==1.21.5
-streamlit-canvas==0.4.0
+streamlit-canvas==0.3.0
