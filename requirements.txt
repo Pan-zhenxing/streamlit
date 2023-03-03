@@ -2,3 +2,4 @@ opencv-python-headless
 numpy
 Pillow
 AugLy
+overlay_onto_solid_color_background
