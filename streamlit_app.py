@@ -41,7 +41,27 @@ if "img" in locals():
     # 如果用户选择去水印，则进行去水印处理
     if watermark:
         img_array = np.array(img)
-        img_array[..., -1] = 255 - img_array[..., -1] # 将水印区域像素的alpha通道反转
+        mask = np.zeros(img_array.shape[:2], dtype=np.uint8)
+        draw = ImageDraw.Draw(img)
+        drawn_mask = False
+        while True:
+            if st.button("完成选取"):
+                break
+            if st.button("重置选取"):
+                mask = np.zeros(img_array.shape[:2], dtype=np.uint8)
+                drawn_mask = False
+            if drawn_mask:
+                st.image(Image.fromarray(np.dstack([img_array, mask])), caption="选取结果", width=500)
+            else:
+                st.image(img, caption="原图", width=500)
+            st.warning("使用鼠标涂抹确定选区")
+            canvas_result = st_canvas(
+                fill_color="rgba(255, 165, 0, 0.3)", stroke_width=0, background_color="#ffffff", height=img.size[1], width=img.size[0], drawing_mode="freedraw", key="canvas"
+            )
+            if canvas_result.image_data is not None:
+                mask = canvas_result.image_data[:,:,3]
+                drawn_mask = True
+        img_array[..., -1] = np.where(mask, 255, img_array[..., -1])
         img = Image.fromarray(img_array)
 
     # 如果用户选择提高图片品质，则进行增强处理
