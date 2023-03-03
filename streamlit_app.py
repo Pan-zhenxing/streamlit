@@ -180,3 +180,4 @@ if button_clicked:
         st.download_button('Download Image', data=processed_image.tobytes(), file_name='processed_image.jpg', mime='image/jpeg')
     except Exception as e:
         st.error(str(e))
+'''
