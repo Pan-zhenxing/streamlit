@@ -1,70 +1,85 @@
 import streamlit as st
+import cv2
+import numpy as np
+from PIL import Image
 import requests
+from io import BytesIO
+from augly.image import overlay_onto_solid_color_background
 
 
-@st.cache  # 语音识别 API 将会缓存
-def recognize_speech(wav_data):
-    url = '9exsX1dSHPQVpdb9Qqbscd4S'
-    wav_data = wav_data.read()
-    response = requests.post(url, data=wav_data).json()
-    return response
+# Helper function to remove watermark from image
+def remove_watermark(image):
+    # TODO: Implement watermark removal algorithm
+    return image
 
 
-# 定义按钮动作
-def record_action(btn):
-    # 显示录音按钮
-    if btn:
-        st.audio('''
-        data:audio/wav;base64,UklGRjQGAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQBAAD/////
-CAIFAEAcAHqGvgH/AAABAAgAJAUAJwC4Bihm1gH/AwACABEAFQBDACUA8tq3AH/AAA
-BAAEACgBXAG8A5QPSMsoA/wMAHwAAAF8ATQCHAMMAjScSAP8ABQAWABQAAQDjAAf/
-BwC4Bihm1gH/AwATEgAyAFsAUgHjAO8A+//uAP8AAQATACsAXQCKAMsAmEHM/6QA
-/wEAGgBXAFoAWQB3AKoD3P/RAf8AAgB6AGQAfQBOAJYAwSCI/6UAhP8DABYAHgAr
-AIEAlADIARIB8v+eA/8ABQA7AEIAZACFAMAApSCu/6sA/wQAHwCAAIEA7AC/ATIB
-m/+7Af8ABQA1AGQARgBlAG4A4f+GAP8DAE4AMABqAHoAewC0AONAHv/XAP8ABQAs
-AD0ARgBeAKMAiP+lAP8DAQAWACoAVQBzAP4AQ//gAP8AAgA4AEEAdwBOAMkAkf+g
-AP8DAE0AHAArAFcAlgDCALX/2QH/AAIAGAAgAHIALwD5AM8Ay/+UAGYAZgBob25n
-        ''', format='audio/wav', start_playing=True)
-        btn.label = '正在录音...'
-        response = recognize_speech(st.file_uploader("", type="audio/wav"))
-        st.write('你说：', response['text'])
-        btn.label = "开始录音"
-        return response['text']
+# Helper function to crop image to a specific aspect ratio
+def crop_image(image, aspect_ratio):
+    # Get current image dimensions
+    height, width, _ = image.shape
+
+    # Calculate target dimensions based on aspect ratio
+    target_height = height
+    target_width = width
+    if aspect_ratio == '16:9':
+        target_width = round(height * 16 / 9)
+    elif aspect_ratio == '4:3':
+        target_width = round(height * 4 / 3)
+
+    # Calculate crop offsets
+    x_offset = round((width - target_width) / 2)
+    y_offset = 0
+
+    # Crop image
+    cropped_image = image[y_offset:y_offset+target_height, x_offset:x_offset+target_width]
+
+    return cropped_image
 
 
-# 主函数
-def main():
-    btn = st.button("开始录音")
-    # 获取录音结果
-    st.write("请问有什么可以帮助您？")
-    user_input = record_action(btn)
-
-    # 将用户输入拼接到聊天内容末尾
-    msg = '你可以说：再见'
-    response = user_input
-
-    # 定义停止循环标志
-    goodbye = False
-    # 开启循环
-    while True:
-        st.write(msg)
-        # 向 chatbot 发送用户输入，获取 chatbot 回答
-        response = requests.post('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', data={'text': response}).json()['response']
-        st.write(response)
-
-        # 检测用户最后输入是否为再见，如果是的话，停止循环
-        if response[-2:] == '再见':
-            goodbye = True
-            st.write('欢迎下次使用～')
-
-        # 如果用户没有说再见，重新启动循环
-        if not goodbye:
-            btn = st.button("开始录音")
-            # 获取录音结果
-            response = record_action(btn)
-        else:
-            break
+# Helper function to enhance image clarity
+def enhance_clarity(image):
+    enhanced_image = overlay_onto_solid_color_background(image, color="white", alpha=0.2)
+    return enhanced_image
 
 
-if __name__ == '__main__':
-    main()
+# Main function to process image
+def process_image(image_url, aspect_ratio):
+    # Load image from URL or file upload
+    if image_url.startswith('http'):
+        response = requests.get(image_url)
+        image = np.array(Image.open(BytesIO(response.content)))
+    else:
+        image = np.array(Image.open(image_url))
+
+    # Remove watermark
+    image = remove_watermark(image)
+
+    # Crop image to aspect ratio
+    image = crop_image(image, aspect_ratio)
+
+    # Enhance image clarity
+    image = enhance_clarity(image)
+
+    # Convert image back to PIL format
+    processed_image = Image.fromarray(image)
+
+    return processed_image
+
+
+# Streamlit app code
+st.title('内部 App-自动化img')
+st.write('功能反馈微信: Allin6118')
+
+# Get user input
+image_url = st.text_input('Enter image URL:')
+aspect_ratio = st.selectbox('Select aspect ratio:', ['16:9', '4:3'])
+button_clicked = st.button('Process Image')
+
+# Process image when button is clicked
+if button_clicked:
+    try:
+        processed_image = process_image(image_url, aspect_ratio)
+        st.image(processed_image, use_column_width=True)
+        st.download_button('Download Image', data=processed_image.tobytes(), file_name='processed_image.jpg', mime='image/jpeg')
+    except Exception as e:
+        st.error(str(e))
