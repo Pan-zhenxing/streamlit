@@ -1,96 +1,93 @@
-from io import BytesIO
 import streamlit as st
-import cv2
-import numpy as np
-from PIL import Image
-import requests
+from PIL import Image, ImageEnhance
 
+# 设置应用标题和说明
+st.title("图片处理应用")
+st.write("上传或输入图片地址，对图片进行处理并下载。")
 
-# Helper function to remove watermark from image
-def remove_watermark(image):
-    # TODO: Implement watermark removal algorithm
-    return image
+# 创建上传图片功能
+uploaded_file = st.file_uploader("上传本地图片", type=["jpg", "jpeg", "png"])
 
+# 创建输入图片地址功能
+image_url = st.text_input("输入图片地址")
 
-# Helper function to crop image to a specific aspect ratio
-def crop_image(image, aspect_ratio):
-    # Get current image dimensions
-    height, width, _ = image.shape
+# 如果有图片上传或地址输入，显示原图
+if uploaded_file is not None:
+    # 打开并显示原图
+    image = Image.open(uploaded_file)
+    st.image(image, caption="原图", use_column_width=True)
 
-    # Calculate target dimensions based on aspect ratio
-    target_height = height
-    target_width = width
-    if aspect_ratio == '16:9':
-        target_width = round(height * 16 / 9)
-    elif aspect_ratio == '4:3':
-        target_width = round(height * 4 / 3)
+elif image_url != "":
+    # 打开并显示原图
+    image = Image.open(image_url)
+    st.image(image, caption="原图", use_column_width=True)
 
-    # Calculate crop offsets
-    x_offset = round((width - target_width) / 2)
-    y_offset = 0
+# 创建去除水印功能
+if st.button("去除水印"):
+    # 获取原图并创建副本
+    new_image = image.copy()
+    
+    # 获取涂抹去除水印
+    edited_image = st.image(new_image, caption="去除水印", use_column_width=True, 
+                            width=int(new_image.width/2), height=int(new_image.height/2))
+    draw = ImageDraw.Draw(new_image)
+    edited = False
+    
+    # 监听鼠标事件
+    while edited_image.image_data is not None:
+        # 获取鼠标位置
+        event = edited_image.get_events()[0]
+        x, y = event.x, event.y
+        
+        if event.type == "MouseDown":
+            edited = True
+        
+        # 如果涂抹，将鼠标位置为中心，半径为10的区域填充白色
+        if edited and event.type == "MouseMove":
+            draw.rectangle((x-10, y-10, x+10, y+10), fill=(255, 255, 255))
+            edited_image.image(new_image)
+        
+        if event.type == "MouseUp":
+            edited = False
 
-    # Crop image
-    cropped_image = image[y_offset:y_offset+target_height, x_offset:x_offset+target_width]
-
-    return cropped_image
-
-
-# Helper function to enhance image clarity
-def enhance_clarity(image):
-    # Convert image to grayscale
-    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-
-    # Apply bilateral filter to smooth out noise while preserving edges
-    blurred = cv2.bilateralFilter(gray, 11, 17, 17)
-
-    # Apply unsharp mask to enhance edges
-    kernel = np.array([[-1,-1,-1], [-1,9,-1], [-1,-1,-1]])
-    sharpened = cv2.filter2D(blurred, -1, kernel)
-
-    # Convert image back to RGB format
-    enhanced_image = cv2.cvtColor(sharpened, cv2.COLOR_GRAY2RGB)
-
-    return enhanced_image
-
-
-# Main function to process image
-def process_image(image_url, aspect_ratio):
-    # Load image from URL or file upload
-    if image_url.startswith('http'):
-        response = requests.get(image_url)
-        image = np.array(Image.open(BytesIO(response.content)))
+# 创建裁剪功能
+if st.button("裁剪"):
+    # 获取原图并创建副本
+    new_image = image.copy()
+    
+    # 计算新图像的大小
+    ratio = st.selectbox("选择比例", options=["16:9", "4:3"])
+    if ratio == "16:9":
+        new_width = int(new_image.height * 16 / 9)
+        if new_width > new_image.width:
+            new_width = new_image.width
+            new_height = int(new_width * 9 / 16)
+        else:
+            new_height = new_image.height
     else:
-        image = np.array(Image.open(image_url))
+        new_width = int(new_image.height * 4 / 3)
+        if new_width > new_image.width:
+            new_width = new_image.width
+            new_height = int(new_width * 3 / 4)
+        else:
+            new_height = new_image.height
+    
+    # 裁剪图像并显示
+    new_image = new_image.crop((0, 0, new_width, new_height))
+    st.image(new_image, caption="裁剪", use_column_width=True)
 
-    # Remove watermark
-    image = remove_watermark(image)
+# 创建提高图片品质功能
+if st.button("提高品质"):
+    # 获取原图并创建副本
+    new_image = image.copy()
+    
+    # 提
+    enhancer = ImageEnhance.Sharpness(new_image)
+    enhance_factor = st.slider("选择增强度", min_value=1, max_value=10, step=1)
+    new_image = enhancer.enhance(enhance_factor)
 
-    # Crop image to aspect ratio
-    image = crop_image(image, aspect_ratio)
-
-    # Enhance image clarity
-    image = enhance_clarity(image)
-
-    # Convert image back to PIL format
-    processed_image = Image.fromarray(image)
-
-    return processed_image
-
-
-# Streamlit app code
-st.title('内部 App-自动化img')
-st.write('功能反馈微信: Allin6118')
-
-# Get user input
-image_url = st.text_input('Enter image URL:')
-aspect_ratio = st.selectbox('Select aspect ratio:', ['16:9', '4:3'])
-button_clicked = st.button('Process Image')
-
-# Process image when button is clicked
-if button_clicked:
-    try:
-        processed_image = process_image(image_url, aspect_ratio)
-        st.image(processed_image, use_column_width=True)
-        st.download_button('Download Image', data=processed_image.tobytes(), file_name='processed_image.jpg', mime='image/jpeg')
-    except Exception as e:
-        st.error(str(e))
+    # 显示增强后的图像
+    st.image(new_image, caption="增强", use_column_width=True)
+    if st.button("下载"):
+        # 下载修改后的图像
+        st.download_button("下载图片", data=new_image, file_name="processed_image.jpg", mime="image/jpeg")
