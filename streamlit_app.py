@@ -4,6 +4,8 @@ import requests
 from io import BytesIO
 import numpy as np
 from streamlit_drawable_canvas import st_canvas
+import uuid
+
 
 # 定义一个函数，用于下载处理后的图片
 def download_img(img):
