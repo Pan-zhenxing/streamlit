@@ -26,7 +26,7 @@ if input_type == "URL":
 else:
     uploaded_file = st.sidebar.file_uploader("上传图片", type=["png", "jpg", "jpeg"])
     if uploaded_file is not None:
-        img = Image.open(uploaded_file)
+        img = Image.open(uploaded_file).convert('RGB')
 
 # 如果有图片输入，则显示原图
 if "img" in locals():
