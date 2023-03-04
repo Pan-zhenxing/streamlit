@@ -47,7 +47,7 @@ if "img" in locals():
         while True:
             if st.button("完成选取"):
                 break
-            if st.button("重置选取"):
+            if st.button("重置选取", key='button2'):
                 mask = np.zeros(img_array.shape[:2], dtype=np.uint8)
                 drawn_mask = False
             if drawn_mask:
