@@ -9,7 +9,7 @@ st.set_page_config(page_title="图片工具内存1.0", layout="wide")
 # 定义一个侧边栏，用于输入图片地址或上传本地图片
 st.sidebar.title("测试版本0.1")
 st.sidebar.title("报错反馈微信：Allin6118")
-st.sidebar.title("上传或输入图片")
+st.sidebar.title("上传或输入图片url")
 input_type = st.sidebar.radio("选择图片类型", ["URL", "本地文件"])
 if input_type == "URL":
     url = st.sidebar.text_input("输入图片URL")
