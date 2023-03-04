@@ -1,16 +1,30 @@
 import streamlit as st
 from PIL import Image
 
-st.title("图片剪切工具")
+# 设置应用标题和页面布局
+st.set_page_config(page_title="图片剪切", layout="wide")
 
-# 获取网络上的图片
-url = st.text_input("请输入图片 URL")
-if url:
-    img = Image.open(requests.get(url, stream=True).raw)
-    st.image(img, caption="原图", use_column_width=True)
+# 定义一个侧边栏，用于输入图片地址或上传本地图片
+st.sidebar.title("上传或输入图片")
+input_type = st.sidebar.radio("选择图片类型", ["URL", "本地文件"])
+if input_type == "URL":
+    url = st.sidebar.text_input("输入图片URL")
+    if url:
+        img = Image.open(url)
+else:
+    uploaded_file = st.sidebar.file_uploader("上传图片", type=["png", "jpg", "jpeg"])
+    if uploaded_file is not None:
+        img = Image.open(uploaded_file)
 
-    # 设置剪切比例
+# 如果有图片输入，则显示原图
+if "img" in locals():
+    st.image(img, caption="原图", width=500)
+
+    # 定义一个侧边栏，用于选择裁剪比例
+    st.sidebar.title("图片裁剪")
     ratio = st.sidebar.radio("选择图片比例", ["原比例", "16:9", "4:3"])
+
+    # 如果用户选择了比例，则进行裁剪
     if ratio == "16:9":
         width, height = img.size
         if width * 9 > height * 16:
@@ -36,5 +50,5 @@ if url:
             bottom = top + new_height
             img = img.crop((0, top, width, bottom))
 
-    # 显示剪切后的图片
-    st.image(img, caption="剪切后的图片", use_column_width=True)
+    # 显示处理后的图片
+    st.image(img, caption="处理后的图片", width=500)
