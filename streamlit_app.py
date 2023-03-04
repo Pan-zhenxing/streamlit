@@ -47,27 +47,18 @@ if "img" in locals():
 
     if watermark:
         img_array = np.array(img)
+        img_array = np.array(img)
         mask = np.zeros(img_array.shape[:2], dtype=np.uint8)
         drawn_mask = False
 
-        while True:
-            button_key = str(uuid.uuid4())
-            if st.button("完成选取", key=button_key):
-                break
+        button_key = str(uuid.uuid4())
+        button_key2 = str(uuid.uuid4())
+        button_key3 = str(uuid.uuid4())
 
-            button_key2 = str(uuid.uuid4())
-            if st.button("重置选取", key=button_key2):
-                mask = np.zeros(img_array.shape[:2], dtype=np.uint8)
-                drawn_mask = False
-
-            if drawn_mask:
-                st.image(Image.fromarray(np.dstack([img_array, mask])), caption="选取结果", width=500)
-            else:
-                st.image(img, caption="原图", width=500)
-
+        while not drawn_mask:
+            st.image(img, caption="原图", width=500)
             st.warning("使用鼠标涂抹确定选区")
 
-            button_key3 = str(uuid.uuid4())
             canvas_result = st_canvas(
                 fill_color="rgba(255, 165, 0, 0.3)",
                 stroke_width=0,
@@ -82,14 +73,19 @@ if "img" in locals():
                 mask = canvas_result.image_data[:, :, 3]
                 drawn_mask = True
 
+            st.image(Image.fromarray(np.dstack([img_array, mask])), caption="选取结果", width=500)
+
+            if st.button("完成选取", key=button_key):
+                break
+
+            if st.button("重置选取", key=button_key2):
+                mask = np.zeros(img_array.shape[:2], dtype=np.uint8)
+                drawn_mask = False
+
         mask = cv2.cvtColor(mask, cv2.COLOR_GRAY2BGR)  # 转换为3通道图像
         img_array = cv2.cvtColor(img_array, cv2.COLOR_RGB2BGR) # 转换为BGR格式
-        # 通过按位与运算去除水印
-        result = cv2.inpaint(img_array, mask, 3, cv2.INPAINT_TELEA)
-
-        # 显示去除水印后的结果
-        st.image(result, caption="去除水印后的结果", width=500)
-
+    # 通过按位与运算去除水印
+    result = cv2.inpaint(img_array, mask, 3, cv2.INPAINT_TE)
     # 如果用户选择了比例，则进行裁剪
     if ratio == "16:9":
         width, height = img.size
