@@ -1,7 +1,7 @@
 import streamlit as st
 import requests
 from PIL import Image
-import BytesIO
+from io import BytesIO
 
 st.set_page_config(page_title="图片剪裁", layout="wide")
 
