@@ -44,7 +44,7 @@ if "img" in locals():
     # 如果用户选择去水印，则进行去水印处理
 
 # ...
-
+'''
     if watermark:
         img_array = np.array(img)
         img_array = np.array(img)
@@ -86,6 +86,7 @@ if "img" in locals():
         img_array = cv2.cvtColor(img_array, cv2.COLOR_RGB2BGR) # 转换为BGR格式
     # 通过按位与运算去除水印
     result = cv2.inpaint(img_array, mask, 3, cv2.INPAINT_TE)
+    '''
     # 如果用户选择了比例，则进行裁剪
     if ratio == "16:9":
         width, height = img.size
