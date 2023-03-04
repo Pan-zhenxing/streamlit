@@ -84,15 +84,11 @@ if "img" in locals():
 
         mask = cv2.cvtColor(mask, cv2.COLOR_GRAY2BGR)  # 转换为3通道图像
         img_array = cv2.cvtColor(img_array, cv2.COLOR_RGB2BGR) # 转换为BGR格式
-            # 通过按位与运算去除水印
-        result = cv2.bitwise_and(img_array, mask)
+        # 通过按位与运算去除水印
+        result = cv2.inpaint(img_array, mask, 3, cv2.INPAINT_TELEA)
 
-    # 将处理后的图片显示出来
-        st.image(result, caption="去除水印后的图片", width=500)
-
-    # 如果用户选择提高图片品质，则进行增强处理
-    #if enhance:
-    #    img = img.filter(ImageFilter.SHARPEN)
+        # 显示去除水印后的结果
+        st.image(result, caption="去除水印后的结果", width=500)
 
     # 如果用户选择了比例，则进行裁剪
     if ratio == "16:9":
