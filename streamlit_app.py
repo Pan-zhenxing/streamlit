@@ -82,11 +82,13 @@ if "img" in locals():
                 mask = canvas_result.image_data[:, :, 3]
                 drawn_mask = True
 
-        # 利用 OpenCV 库处理水印
-        img_array = cv2.cvtColor(img_array, cv2.COLOR_RGB2BGR)
-        mask = cv2.cvtColor(mask, cv2.COLOR_GRAY2BGR)
-        masked = cv2.subtract(img_array, mask)
-        img = Image.fromarray(cv2.cvtColor(masked, cv2.COLOR_BGR2RGB))
+        mask = cv2.cvtColor(mask, cv2.COLOR_GRAY2BGR)  # 转换为3通道图像
+        img_array = cv2.cvtColor(img_array, cv2.COLOR_RGB2BGR) # 转换为BGR格式
+            # 通过按位与运算去除水印
+        result = cv2.bitwise_and(img_array, mask)
+
+    # 将处理后的图片显示出来
+        st.image(result, caption="去除水印后的图片", width=500)
 
     # 如果用户选择提高图片品质，则进行增强处理
     #if enhance:
