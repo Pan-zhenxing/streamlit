@@ -50,7 +50,8 @@ if "img" in locals():
             button_key = str(uuid.uuid4())
             if st.button("完成选取", key=button_key):
                 break
-            if st.button("重置选取", key='button2'):
+            button_key2 = str(uuid.uuid4())
+            if st.button("重置选取", key=button_key2):
                 mask = np.zeros(img_array.shape[:2], dtype=np.uint8)
                 drawn_mask = False
             if drawn_mask:
