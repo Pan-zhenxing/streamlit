@@ -44,49 +44,7 @@ if "img" in locals():
     # 如果用户选择去水印，则进行去水印处理
 
 # ...
-'''
-    if watermark:
-        img_array = np.array(img)
-        img_array = np.array(img)
-        mask = np.zeros(img_array.shape[:2], dtype=np.uint8)
-        drawn_mask = False
 
-        button_key = str(uuid.uuid4())
-        button_key2 = str(uuid.uuid4())
-        button_key3 = str(uuid.uuid4())
-
-        while not drawn_mask:
-            st.image(img, caption="原图", width=500)
-            st.warning("使用鼠标涂抹确定选区")
-
-            canvas_result = st_canvas(
-                fill_color="rgba(255, 165, 0, 0.3)",
-                stroke_width=0,
-                background_color="#ffffff",
-                height=img.size[1],
-                width=img.size[0],
-                drawing_mode="freedraw",
-                key='canvas' + button_key3
-            )
-
-            if canvas_result.image_data is not None:
-                mask = canvas_result.image_data[:, :, 3]
-                drawn_mask = True
-
-            st.image(Image.fromarray(np.dstack([img_array, mask])), caption="选取结果", width=500)
-
-            if st.button("完成选取", key=button_key):
-                break
-
-            if st.button("重置选取", key=button_key2):
-                mask = np.zeros(img_array.shape[:2], dtype=np.uint8)
-                drawn_mask = False
-
-        mask = cv2.cvtColor(mask, cv2.COLOR_GRAY2BGR)  # 转换为3通道图像
-        img_array = cv2.cvtColor(img_array, cv2.COLOR_RGB2BGR) # 转换为BGR格式
-    # 通过按位与运算去除水印
-    result = cv2.inpaint(img_array, mask, 3, cv2.INPAINT_TE)
-    '''
     # 如果用户选择了比例，则进行裁剪
     if ratio == "16:9":
         width, height = img.size
