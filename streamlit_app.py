@@ -5,6 +5,7 @@ from io import BytesIO
 import numpy as np
 from streamlit_drawable_canvas import st_canvas
 import uuid
+import cv2
 
 
 # 定义一个函数，用于下载处理后的图片
@@ -41,6 +42,9 @@ if "img" in locals():
     ratio = st.sidebar.radio("选择图片比例", ["原比例", "16:9", "4:3"])
 
     # 如果用户选择去水印，则进行去水印处理
+
+# ...
+
     if watermark:
         img_array = np.array(img)
         mask = np.zeros(img_array.shape[:2], dtype=np.uint8)
@@ -71,15 +75,18 @@ if "img" in locals():
                 height=img.size[1],
                 width=img.size[0],
                 drawing_mode="freedraw",
-                key=button_key3
+                key='canvas' + button_key3
             )
 
             if canvas_result.image_data is not None:
                 mask = canvas_result.image_data[:, :, 3]
                 drawn_mask = True
 
-        img_array[..., -1] = np.where(mask, 255, img_array[..., -1])
-        img = Image.fromarray(img_array)
+        # 利用 OpenCV 库处理水印
+        img_array = cv2.cvtColor(img_array, cv2.COLOR_RGB2BGR)
+        mask = cv2.cvtColor(mask, cv2.COLOR_GRAY2BGR)
+        masked = cv2.subtract(img_array, mask)
+        img = Image.fromarray(cv2.cvtColor(masked, cv2.COLOR_BGR2RGB))
 
     # 如果用户选择提高图片品质，则进行增强处理
     #if enhance:
