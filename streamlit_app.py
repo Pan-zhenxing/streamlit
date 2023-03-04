@@ -71,7 +71,7 @@ if "img" in locals():
                 height=img.size[1],
                 width=img.size[0],
                 drawing_mode="freedraw",
-                key='canvas'
+                key='canvas' + button_key3
             )
 
             if canvas_result.image_data is not None:
